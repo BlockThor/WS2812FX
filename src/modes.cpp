@@ -759,9 +759,10 @@ uint16_t WS2812FX::mode_dual_larson(void) {
 
 // Running random2 effect (simplified version of the custom RandomChase effect)
 uint16_t WS2812FX::mode_running_random2(void) {
-  uint8_t size = 2 << SIZE_OPTION;
+  uint8_t size = 4 << SIZE_OPTION;
   uint32_t color = IS_REVERSE ? getPixelColor(_seg->stop): getPixelColor(_seg->start);
 
+  color = color_blend(color, BLACK, 0x300/size); // fade the 'tail'
   // periodically change the color
   if((_seg_rt->counter_mode_step) % size == 0) {
     color = ((uint32_t)random8() << 16) | random16();
