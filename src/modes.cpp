@@ -52,7 +52,7 @@ uint16_t WS2812FX::mode_static(void) {
  * Normal blinking. 50% on/off time.
  */
 uint16_t WS2812FX::mode_blink(void) {
-  return blink(_seg->colors[0], _seg->colors[1], false);
+  return blink(_seg->colors[0], _seg->colors[1], false)*2;
 }
 
 /*
