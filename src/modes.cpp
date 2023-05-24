@@ -143,8 +143,9 @@ uint16_t WS2812FX::mode_single_dynamic(void) {
   }
   uint16_t first = _seg->start + (random16(_seg_len / size + 1) * size);
   fill(color_wheel(random8()), first, size);
+
   SET_CYCLE;
-  return (_seg->speed / 16) ;
+  return (_seg->speed / 16 * size) ;// slow down with bigger size
 }
 
 /*
@@ -163,7 +164,7 @@ uint16_t WS2812FX::mode_multi_dynamic(void) {
     }
   }
   SET_CYCLE;
-  return (_seg->speed / 4);
+  return (_seg->speed);// to harmonize speed to 60BPM
 }
 
 /*
