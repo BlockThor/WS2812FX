@@ -127,7 +127,8 @@ Effects
 53. **Bicolor Chase** - Two LEDs running on a background color.
 54. **Tricolor Chase** - Alternating three color pixels running.
 55. **TwinkleFOX** - Lights fading in and out randomly.
-56. thru 63. **Custom** - Up to eight user created custom effects.
+56. **Rain** - Light rain traises.
+57. thru 64. **Custom** - Up to eight user created custom effects.
 
 
 Projects using WS2812FX
