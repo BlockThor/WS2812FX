@@ -52,7 +52,7 @@ uint16_t WS2812FX::mode_static(void) {
  * Normal blinking. 50% on/off time.
  */
 uint16_t WS2812FX::mode_blink(void) {
-  return blink(_seg->colors[0], _seg->colors[1], false);
+  return blink(_seg->colors[0], _seg->colors[1], false)*2;
 }
 
 /*
@@ -136,12 +136,14 @@ uint16_t WS2812FX::mode_random_color(void) {
  */
 uint16_t WS2812FX::mode_single_dynamic(void) {
   uint8_t size = 1 << SIZE_OPTION;
-  if(_seg_rt->counter_mode_call == 0) {
+  if(_seg_rt->counter_mode_call == 0) { // initialize segment with random colors
     for(uint16_t i=_seg->start; i <= _seg->stop; i+=size) {
       fill(color_wheel(random8()), i, size);
     }
   }
-  fill(color_wheel(random8()), _seg->start + random16(_seg_len/size)*size, size);
+  uint16_t first = _seg->start + (random16(_seg_len / size + 1) * size);
+  fill(color_wheel(random8()), first, size);
+
   SET_CYCLE;
   return (_seg->speed / 16 * size) ;// slow down with bigger size
 }
@@ -151,9 +153,15 @@ uint16_t WS2812FX::mode_single_dynamic(void) {
  * to new random colors.
  */
 uint16_t WS2812FX::mode_multi_dynamic(void) {
-  uint8_t size = 1 << SIZE_OPTION;
-  for(uint16_t i=_seg->start; i <= _seg->stop; i+=size) {
-    fill(color_wheel(random8()), i, size);
+  if(SIZE_OPTION) {
+    uint8_t size = 1 << SIZE_OPTION;
+    for(uint16_t i=_seg->start; i <= _seg->stop; i+=size) {
+      fill(color_wheel(random8()), i, size);
+    }
+  } else {
+    for(uint16_t i=_seg->start; i <= _seg->stop; i++) {
+      setPixelColor(i, color_wheel(random8()));
+    }
   }
   SET_CYCLE;
   return (_seg->speed);// to harmonize speed to 60BPM
@@ -609,7 +617,7 @@ uint16_t WS2812FX::mode_fire_flicker_intense(void) {
   return fire_flicker(1);
 }
 
-// An adaptation of Mark Kriegsman's FastLED twinkeFOX effect
+// An adaptation of Mark Kriegsman's FastLED twinkleFOX effect
 // https://gist.github.com/kriegsman/756ea6dcae8e30845b5a
 uint16_t WS2812FX::mode_twinkleFOX(void) {
   uint16_t mySeed = 0; // reset the random number generator seed
@@ -718,7 +726,8 @@ uint16_t WS2812FX::mode_icu(void) {
   uint16_t index = _seg->start + pos;        // index of the first eye
   uint16_t index2 = index + _seg_len/2;      // index of the second eye
 
-  Adafruit_NeoPixel::clear(); // erase the current eyes
+  setPixelColor(index, BLACK); // erase the current eyes
+  setPixelColor(index2, BLACK);
 
   // if the eyes have not reached their destination
   if(pos != dest) {
@@ -760,9 +769,10 @@ uint16_t WS2812FX::mode_dual_larson(void) {
 
 // Running random2 effect (simplified version of the custom RandomChase effect)
 uint16_t WS2812FX::mode_running_random2(void) {
-  uint8_t size = 2 << SIZE_OPTION;
+  uint8_t size = 4 << SIZE_OPTION;
   uint32_t color = IS_REVERSE ? getPixelColor(_seg->stop): getPixelColor(_seg->start);
 
+  color = color_blend(color, BLACK, 0x300/size); // fade the 'tail'
   // periodically change the color
   if((_seg_rt->counter_mode_step) % size == 0) {
     color = ((uint32_t)random8() << 16) | random16();
@@ -771,7 +781,7 @@ uint16_t WS2812FX::mode_running_random2(void) {
   return running(color, color);
 }
 
-// simplied version of the custom filler up mode
+// simplified version of the custom filler up mode
 uint16_t WS2812FX::mode_filler_up(void) {
   uint8_t size = 1 << SIZE_OPTION;
 
@@ -1123,7 +1133,7 @@ uint16_t WS2812FX::mode_oscillator(void) {
     Oscillator* osc = &src[i];
     if(osc->size == 0) osc->size = 1; // make sure the size is at least one
     osc->pos += osc->speed; // update the osc position
-    // check if the new poistion is within the segment bounds, and reset if not
+    // check if the new position is within the segment bounds, and reset if not
     if((osc->pos <= 0) || osc->pos >= (_seg_len - 1)) {
       int8_t newSpeed = 1 + random8(2);
       osc->pos   = (osc->speed <= 0) ? 0        : _seg_len - 1; // reset position
