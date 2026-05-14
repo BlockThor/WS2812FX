@@ -8,11 +8,9 @@
 # output a file and go get a cup of coffee:
 #   ./tester.zsh > tester.txt
 
-# add the Arduino IDE 1.0 application to $PATH
-# export PATH="$PATH:/Applications/Arduino IDE.app/Contents/MacOS"
-
 # path to the Arduino IDE 2.0 CLI executable (for MacOS)
-alias -g arduinoCLI="/Applications/Arduino\ IDE.app/Contents/Resources/app/node_modules/arduino-ide-extension/build/arduino-cli"
+#alias -g arduinoCLI="/Applications/Arduino\ IDE.app/Contents/Resources/app/node_modules/arduino-ide-extension/build/arduino-cli"
+alias -g arduinoCLI="/Applications/Arduino\ IDE.app/Contents/Resources/app/lib/backend/resources/arduino-cli"
 
 # test that we can execute the Arduino command
 # arduinoCLI version
@@ -22,18 +20,24 @@ alias -g leonardo-board="arduino:avr:leonardo"
 alias -g esp8266-board="esp8266:esp8266:nodemcuv2"
 alias -g esp32-board="esp32:esp32:esp32doit-devkit-v1"
 alias -g rp2040-board="rp2040:rp2040:rpipico"
+alias -g ATtiny-board="megaTinyCore:megaavr:atxy2"
 
 # port aliases
 alias -g leonardo-port="/dev/cu.usbmodem14101 (Arduino Leonardo)"
 alias -g esp8266-port="/dev/cu.usbserial-0001"
 alias -g esp32-port="/dev/cu.usbserial-0001"
 alias -g rp2040-port="/dev/cu.usbmodem14101 (Raspberry Pi Pico)"
+alias -g ATtiny-port="/dev/cu.usbserial-2340 SerialPort (USB)"  # Arduino Nano used as a programmer
+
+# compile options
+alias -g compile-options="compile --no-color --libraries \"../..\""
+alias -g upload-options="upload --no-color --libraries \"../..\""
 
 # example compile command:
-# arduinoCLI compile -b leonardo-board ws2812fx_segments/ws2812fx_segments.ino
+# arduinoCLI compile-options -b leonardo-board ws2812fx_segments/ws2812fx_segments.ino
 
 # example upload command:
-# arduinoCLI upload -b leonardo-board -p leonardo-port ws2812fx_segments/ws2812fx_segments.ino
+# arduinoCLI upload-options -b leonardo-board -p leonardo-port ws2812fx_segments/ws2812fx_segments.ino
 
 # create a list of basic example sketches that can be compiled for all boards
 basic_sketches=( 'auto_mode_cycle/auto_mode_cycle.ino'
@@ -58,25 +62,25 @@ basic_sketches=( 'auto_mode_cycle/auto_mode_cycle.ino'
 for ((i = 1; i <= $#basic_sketches; i++)) {
   echo "\nCompiling" $basic_sketches[i] for Arduino Leonardo
 # arduino --board leonardo-board --verify $basic_sketches[i] 2>/dev/null; echo "exit status" $? ## old Arduino IDE 1.0 syntax
-  arduinoCLI compile --no-color -b leonardo-board $basic_sketches[i] 2>/dev/null; echo "exit status" $?
+  arduinoCLI compile-options -b leonardo-board $basic_sketches[i] 2>/dev/null; echo "exit status" $?
 }
 
 # run compile command for all sketches for the ESP8266 board
 for ((i = 1; i <= $#basic_sketches; i++)) {
   echo "\nCompiling" $basic_sketches[i] for ESP8266
-  arduinoCLI compile --no-color -b esp8266-board $basic_sketches[i] 2>/dev/null; echo "exit status" $?
+  arduinoCLI compile-options -b esp8266-board $basic_sketches[i] 2>/dev/null; echo "exit status" $?
 }
 
 # run compile command for all sketches for the ESP32 board
 for ((i = 1; i <= $#basic_sketches; i++)) {
   echo "\nCompiling" $basic_sketches[i] for ESP32
-  arduinoCLI compile --no-color -b esp32-board $basic_sketches[i] 2>/dev/null; echo "exit status" $?
+  arduinoCLI compile-options -b esp32-board $basic_sketches[i] 2>/dev/null; echo "exit status" $?
 }
 
 # run compile command for all sketches for the RP2040 board
 for ((i = 1; i <= $#basic_sketches; i++)) {
   echo "\nCompiling" $basic_sketches[i] for RP2040
-  arduinoCLI compile --no-color -b rp2040-board $basic_sketches[i] 2>/dev/null; echo "exit status" $?
+  arduinoCLI compile-options -b rp2040-board $basic_sketches[i] 2>/dev/null; echo "exit status" $?
 }
 
 # create a list of example sketches that use WiFi to be compiled only on ESP boards
@@ -92,20 +96,24 @@ wifi_sketches=(
 # run compile command for all sketches for the ESP8266 board
 for ((i = 1; i <= $#wifi_sketches; i++)) {
   echo "\nCompiling" $wifi_sketches[i] for ESP8266
-  arduinoCLI compile --no-color -b esp8266-board $wifi_sketches[i] 2>/dev/null; echo "exit status" $?
+  arduinoCLI compile-options -b esp8266-board $wifi_sketches[i] 2>/dev/null; echo "exit status" $?
 }
 
 # run compile command for all sketches for the ESP32 board
 for ((i = 1; i <= $#wifi_sketches; i++)) {
   echo "\nCompiling" $wifi_sketches[i] for ESP32
-  arduinoCLI compile --no-color -b esp32-board $wifi_sketches[i] 2>/dev/null; echo "exit status" $?
+  arduinoCLI compile-options -b esp32-board $wifi_sketches[i] 2>/dev/null; echo "exit status" $?
 }
 
 # the ws2812fx_soundfx example sketch uses the ESP8266Audio, which doesn't seem to support
 # the ESP32 very well, so test that separately
 echo "\nCompiling ws2812fx_soundfx/ws2812fx_soundfx.ino for ESP8266"
-arduinoCLI compile --no-color -b esp8266-board ws2812fx_soundfx/ws2812fx_soundfx.ino 2>/dev/null; echo "exit status" $?
+arduinoCLI compile-options -b esp8266-board ws2812fx_soundfx/ws2812fx_soundfx.ino 2>/dev/null; echo "exit status" $?
 
 # the ws2812fx_dma example sketch is written to work only on ESP8266 boards, so test that separately
 echo "\nCompiling ws2812fx_dma/ws2812fx_dma.ino for ESP8266"
-arduinoCLI compile --no-color -b esp8266-board ws2812fx_dma/ws2812fx_dma.ino 2>/dev/null; echo "exit status" $?
+arduinoCLI compile-options -b esp8266-board ws2812fx_dma/ws2812fx_dma.ino 2>/dev/null; echo "exit status" $?
+
+# the ATtiny board is special, so test that separately
+echo "\nCompiling ws2812fx_ATtiny/ws2812fx_ATtiny.ino for ATtiny412"
+arduinoCLI compile-options -b ATtiny-board ws2812fx_ATtiny/ws2812fx_ATtiny.ino 2>/dev/null; echo "exit status" $?
